@@ -1,0 +1,9 @@
+<h3>Удаление учетной записи сервиса GETaxle</h3>
+<h3>{{{message}}}</h3>
+<form action="/deleteAccount" method="post">
+    <fieldset>
+        <legend>Введите номер телефона на который производилась регистрация</legend>
+        <label>Номер телефона.<input type="tel" name="tel" pattern="[0-9]{11}" maxlength="11" minlength="11" required autofocus placeholder="71234567890"></label>
+        <button type="submit">Удалить учетную запись</button>
+    </fieldset>
+</form>

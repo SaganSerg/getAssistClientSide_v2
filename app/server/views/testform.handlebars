@@ -1,0 +1,285 @@
+<style>
+    form {
+        padding-bottom: 10px;
+    }
+
+    .appear {
+        pointer-events: auto;
+    }
+
+    .unactive {
+        pointer-events: none;
+    }
+</style>
+<form id="chooseEnvironment">
+    <fieldset>
+        <legend>Choose Environment</legend>
+        <label> Environment
+            <select name="environment">
+                <option value="test">test</option>
+                <option value="production">production</option>
+                <option value="development">development</option>
+            </select>
+            <button type="submit">Set environment</button>
+        </label>
+    </fieldset>
+</form>
+<div id="forms" class="unactive">
+    
+    <form id="getSMSСodeForRegistrationByTelephone">
+        <fieldset>
+            <legend>getSMSСodeForRegistrationByTelephone</legend>
+            <label>telephoneNumber<input type="text" name="telephoneNumber"></label>
+            <label>serialNumberOfPhone<input type="text" name="serialNumberOfPhone"></label>
+            <button type="submit">getSMSСodeForRegistrationByTelephone</button>
+        </fieldset>
+    </form>
+    {{!-- <form id="getToken">
+        <fieldset>
+            <legend>getToken</legend>
+            <label>telephoneNumber<input type="text" name="telephoneNumber"></label>
+            <label>smsCode<input type="text" name="smsCode"></label>
+            <label>userName<input type="text" name="userName"></label>
+            <button type="submit">getToken</button>
+        </fieldset>
+    </form> --}}
+    {{!-- <form id="checkToken">
+        <fieldset>
+            <legend>checkToken</legend>
+            <label>token<input type="text" name="token"></label>
+            <button type="submit">checkToken</button>
+        </fieldset>
+    </form> --}}
+    {{!-- <form id="checkQRcode">
+        <fieldset>
+            <legend>checkQRcode</legend>
+            <label>qr<input type="text" name="qr"></label>
+            <label>token<input type="text" name="token"></label>
+            <button type="submit">checkQRcode</button>
+        </fieldset>
+    </form> --}}
+    {{!-- <form id="getCodeForRegistrationByEmail">
+        <fieldset>
+            <legend>getCodeForRegistrationByEmail</legend>
+            <label>email<input type="email" name="email"></label>
+            <button type="submit">getCodeForRegistrationByEmail</button>
+        </fieldset>
+    </form> --}}
+    {{!-- <form id="setConfig">
+        <fieldset>
+            <legend>setConfig</legend>
+            <label>conf<input type="text" name="conf"></label>
+            <label>token<input type="text" name="token"></label>
+            <button type="submit">setConfig</button>
+        </fieldset>
+    </form> --}}
+    {{!-- <form id="getConfig">
+        <fieldset>
+            <legend>getConfig</legend>
+            <label>token<input type="text" name="token"></label>
+            <button type="submit">getConfig</button>
+        </fieldset>
+    </form> --}}
+    {{!-- <form id="deleteConfig">
+        <fieldset>
+            <legend>deleteConfig</legend>
+            <label>token<input type="text" name="token"></label>
+            <button type="submit">deleteConfig</button>
+        </fieldset>
+    </form> --}}
+    {{!-- <form id="refreshtoken">
+        <fieldset>
+            <legend>refreshtoken</legend>
+            <label>refreshToken<input type="text" name="refreshToken"></label>
+            <button type="submit">refreshtoken</button>
+        </fieldset>
+    </form> --}}
+</div>
+<script>
+   
+    let domen = null
+    document.getElementById('chooseEnvironment').addEventListener('submit', (evt) => {
+        evt.preventDefault()
+        const environmentValue = {
+            test: {
+                domen: 'localhost'
+            },
+            production: {
+                domen: 'my.limpoff.ru'
+            },
+            development: {
+                domen: 'localhost'
+            }
+        }
+        domen = environmentValue[evt.target.elements.environment.value].domen
+        document.getElementById('forms').setAttribute('class', 'appear')
+    })
+    
+    /*
+    document.getElementById('setConfig').addEventListener('submit', (evt) => {
+        evt.preventDefault()
+        const form = evt.target
+        const body = JSON.stringify({
+            accessToken: form.elements.token.value,
+            conf: JSON.parse(form.elements.conf.value)
+        })
+        fetch(`https://${domen}/api/setConfig`, {
+            method: 'POST',
+            headers: new Headers(
+                {
+                    'Content-Type': 'application/json'
+                }
+            ),
+            body
+        })
+    })
+    */
+    /*
+    document.getElementById('getConfig').addEventListener('submit', (evt) => {
+        evt.preventDefault()
+        const form = evt.target
+        const body = JSON.stringify({
+            accessToken: form.elements.token.value
+        })
+        fetch(`https://${domen}/api/getConfig`, {
+            method: 'POST',
+            headers: new Headers(
+                {
+                    'Content-Type': 'application/json'
+                }
+            ),
+            body
+        })
+    })
+    */
+    /*
+    document.getElementById('deleteConfig').addEventListener('submit', (evt) => {
+        evt.preventDefault()
+        const form = evt.target
+        const body = JSON.stringify({
+            accessToken: form.elements.token.value
+        })
+        fetch(`https://${domen}/api/deleteConfig`, {
+            method: 'POST',
+            headers: new Headers(
+                {
+                    'Content-Type': 'application/json'
+                }
+            ),
+            body
+        })
+    })
+    */
+    /*
+    document.getElementById('getCodeForRegistrationByEmail').addEventListener('submit', (evt) => {
+        evt.preventDefault()
+        const form = evt.target
+        const body = JSON.stringify({
+            email: form.elements.email.value
+        })
+        fetch(`https://${domen}/api/getCodeForRegistrationByEmail`, {
+            method: 'POST',
+            headers: new Headers(
+                {
+                    'Content-Type': 'application/json'
+                }
+            ),
+            body
+        })
+    })
+    */
+    
+    document.getElementById('getSMSСodeForRegistrationByTelephone').addEventListener('submit', (evt) => {
+        evt.preventDefault()
+        const form = evt.target
+        const body = JSON.stringify({
+            telephoneNumber: form.elements.telephoneNumber.value,
+            serialNumberOfPhone: form.elements.serialNumberOfPhone.value
+        })
+        fetch(`https://${domen}/api/getSMSCodeForRegistrationByTelephone`, {
+            method: 'POST',
+            headers: new Headers(
+                {
+                    'Content-Type': 'application/json'
+                }
+            ),
+            body
+        })
+    })
+    
+    /*
+    document.getElementById('getToken').addEventListener('submit', (evt) => {
+        evt.preventDefault()
+        const form = evt.target
+        const body = JSON.stringify({
+            telephoneNumber: form.elements.telephoneNumber.value,
+            smsCode: form.elements.smsCode.value,
+            userName: form.elements.userName.value
+        })
+        fetch(`https://${domen}/api/getTokens`, {
+            method: 'POST',
+            headers: new Headers(
+                {
+                    'Content-Type': 'application/json'
+                }
+            ),
+            body
+        })
+    })
+    */
+    /*
+    document.getElementById('checkToken').addEventListener('submit', (evt) => {
+        evt.preventDefault()
+        const form = evt.target
+        const body = JSON.stringify({
+            accessToken: form.elements.token.value
+        })
+        fetch(`https://${domen}/api/checkToken`, {
+            method: 'POST',
+            headers: new Headers(
+                {
+                    'Content-Type': 'application/json'
+                }
+            ),
+            body
+        })
+    })
+    */
+    /*
+    document.getElementById('checkQRcode').addEventListener('submit', (evt) => {
+        evt.preventDefault()
+        const form = evt.target
+        const body = JSON.stringify({
+            accessToken: form.elements.token.value,
+            deviceQRcode: form.elements.qr.value
+        })
+        fetch(`https://${domen}/api/checkLegalDevice`, {
+            method: 'POST',
+            headers: new Headers(
+                {
+                    'Content-Type': 'application/json'
+                }
+            ),
+            body
+        })
+    })
+    */
+    /* 
+    document.getElementById('refreshtoken').addEventListener('submit', (evt) => {
+        evt.preventDefault()
+        const form = evt.target
+        const body = JSON.stringify({
+            refreshToken: form.elements.refreshToken.value
+        })  
+        fetch(`https://${domen}/api/refreshtoken`, {
+            method: 'POST',
+            headers: new Headers(
+                {
+                    'Content-Type': 'application/json'
+                }
+            ),
+            body
+        })  
+    })
+    */
+</script>
