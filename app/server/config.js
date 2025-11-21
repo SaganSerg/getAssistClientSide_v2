@@ -32,7 +32,8 @@ module.exports = {
   fakeTelephoneForProduction: '79601302040',
   fakeTelephoneForDevelopment: '79601302040',
   fakeTelephoneForTest: '79601302040',
-  // maxLenghtOfUserName: 50,
+  maxLenghtOfUserName: 50,
+  fakeSMS: 12345,
   // cleanSmsCodeTime: deleteSmsTime * 2, // данные в любом случае будут
   // serverToken: 'kuhalkulkjbgjhgjshgcnbvccvxdsgfdhgfjgvbfdsfgdsawqewydfdtjtjhgfjghfbnvcnbvcjgjhgfttygfdsgfdsgfdsgfdsgdfsgfdsgfdsvbvcxxdhgfdhgfd'
 };
