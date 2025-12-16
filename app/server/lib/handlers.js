@@ -4,6 +4,9 @@ const { getTimeForMySQL, getFakeTel, ifGetCheckGooglePlay } = require('./commonF
 const getFunGetResponseJSON = require('./getFunGetResponseJSON');
 const makeConnectionUpdateUsersReturnJSON = require('./makeConnectionUpdateUsersReturnJSON');
 const db = require('./db');
+const deleteOwner = require('./deleteOwner');
+const deleteConnection = require('./deleteConnection');
+const getTokenFunction = require('./getTokenFunction');
 const {
   telephoneNumberMin,
   telephoneNumberMax,
@@ -14,6 +17,8 @@ const {
   maxLenghtOfUserName,
   deleteSmsTime,
   fakeSMS,
+  accessTokenExpire,
+  refreshTokenExpire,
 } = require('./../config');
 
 const getFunGetSMSCodeForRegistrationByTelephone = (
@@ -259,16 +264,34 @@ const getFunGetTokens = (getFunGetResponseJSON, db, makeConnectionUpdateUsersRet
                                 'ощибка БД INSERT INTO owners (user_id) VALUES (?)',
                               ),
                             );
+                        /* 
+                            req,
+                            res,
+                            next,
+                            db,
+                            getResponseJSON,
+                            getTokenFunction,
+                            userId,
+                            deleteOwner,
+                            deleteConnection,
+                            accessTokenExpire,
+                            refreshTokenExpire,
+                            userName, // если данных нет, то должна быть передана пустая строка
+                            objOwnerId, // { id: "Number: owner_id", toDeleteOwner: false or true } удалять владельца или нет
+                            status, 
+                            */
                         return makeConnectionUpdateUsersReturnJSON(
                           req,
                           res,
                           next,
                           db,
                           getResponseJSON,
-                          addTextInComment,
+                          // addTextInComment, // этот параметер нужно убрать
                           getTokenFunction,
                           userId,
-                          credentials,
+                          // credentials,
+                          deleteOwner,
+                          deleteConnection,
                           accessTokenExpire,
                           refreshTokenExpire,
                           userName,
@@ -284,10 +307,12 @@ const getFunGetTokens = (getFunGetResponseJSON, db, makeConnectionUpdateUsersRet
                       next,
                       db,
                       getResponseJSON,
-                      addTextInComment,
+                      // addTextInComment, // этот параметер нужно убрать
                       getTokenFunction,
                       userId,
-                      credentials,
+                      // credentials,
+                      deleteOwner,
+                      deleteConnection,
                       accessTokenExpire,
                       refreshTokenExpire,
                       userName ? userName : selectOwnersRows[0].u_user_name,

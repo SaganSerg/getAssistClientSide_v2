@@ -36,4 +36,5 @@ module.exports = {
   fakeSMS: 12345,
   // cleanSmsCodeTime: deleteSmsTime * 2, // данные в любом случае будут
   // serverToken: 'kuhalkulkjbgjhgjshgcnbvccvxdsgfdhgfjgvbfdsfgdsawqewydfdtjtjhgfjghfbnvcnbvcjgjhgfttygfdsgfdsgfdsgfdsgdfsgfdsgfdsvbvcxxdhgfdhgfd'
+  userAgentName: 'Unknown',
 };
