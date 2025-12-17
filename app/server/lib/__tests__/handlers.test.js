@@ -332,15 +332,15 @@ test('getTokens', () => {
       accessToken: 'qwerty',
       refreshToken: 'qwerty',
       ownerId: objOwnerId.id,
-      userId: userId,
+      userId,
       connectedUserAgent: [
         {
           connectedId: '1',
           connectedUserAgentName: 'someAgent',
         },
       ],
-      status: status,
-      userName: userName,
+      status,
+      userName,
     };
   };
   const DBfake = DB((query, paramArr, innerFun, otherThis, smsCodeNumberOfCharacters) => {}, []);
@@ -707,6 +707,380 @@ test('getTokens', () => {
     responseCode: '0041001',
   });
 
+  /* 'SELECT * FROM smscodes WHERE telephone_id = ? AND smscode_timeLastAttempt > ?' selectSmsCodeRows[0].smscode_value != smsCode */
+  const DB8 = DB(
+    (query, paramArr, innerFun, otherThis, smsCodeNumberOfCharacters) => {
+      if (query === otherThis.queryList[0]) {
+        if (isNaN(Number(paramArr[0]))) return innerFun({ code: 'something1_DB5' });
+        return innerFun(false, [{ user_id: 1, telephone_id: 1 }]);
+      }
+      if (query === otherThis.queryList[1]) {
+        if (typeof paramArr[0] !== 'number') return innerFun({ code: 'something2_DB5' });
+        if (typeof paramArr[1] !== 'string') return innerFun({ code: 'something3_DB5' });
+        return innerFun(false, [{ smscode_value: 11112 }]);
+      }
+    },
+    [
+      'SELECT * FROM telephones WHERE telephone_number = ?',
+      'SELECT * FROM smscodes WHERE telephone_id = ? AND smscode_timeLastAttempt > ?',
+      // 'SELECT o.owner_id AS o_owner_id , o.user_id AS o_user_id, o.comment_ AS o_comment_ , o.time_ AS o_time_, o.delete_ AS o_delete_, u.user_name AS u_user_name, u.comment_ AS u_comment_ , u.time_ AS u_time_, u.delete_ AS u_delete_ FROM owners o INNER JOIN users u ON o.user_id = u.user_id WHERE o.user_id = ?',
+      // 'INSERT INTO owners (user_id) VALUES (?)',
+    ],
+  );
+  expect(
+    handlers.getFunGetTokens(
+      getFunGetResponseJSON,
+      DB8,
+      makeConnectionUpdateUsersReturnJSON,
+    )(app('test'))(req, res, next),
+  ).toEqual({
+    result: 'ERR',
+    description: 'SMS code is wrong -- код смс не соответсвует реальной смс',
+    responseCode: '0041001',
+  });
+
+  /* 'SELECT * FROM smscodes WHERE telephone_id = ? AND smscode_timeLastAttempt > ?' telephoneNumber !== fakeTel smsCode !== fakeSMS */
+  req = {
+    body: {
+      telephoneNumber: '79601302040', // фейковый телефон
+      smsCode: '11111',
+    },
+  };
+  const DB9 = DB(
+    (query, paramArr, innerFun, otherThis, smsCodeNumberOfCharacters) => {
+      if (query === otherThis.queryList[0]) {
+        if (isNaN(Number(paramArr[0]))) return innerFun({ code: 'something1_DB5' });
+        return innerFun(false, [{ user_id: 1, telephone_id: 1 }]);
+      }
+      if (query === otherThis.queryList[1]) {
+        if (typeof paramArr[0] !== 'number') return innerFun({ code: 'something2_DB5' });
+        if (typeof paramArr[1] !== 'string') return innerFun({ code: 'something3_DB5' });
+        return innerFun(false, [{ smscode_value: 11112 }]);
+      }
+    },
+    [
+      'SELECT * FROM telephones WHERE telephone_number = ?',
+      'SELECT * FROM smscodes WHERE telephone_id = ? AND smscode_timeLastAttempt > ?',
+      // 'SELECT o.owner_id AS o_owner_id , o.user_id AS o_user_id, o.comment_ AS o_comment_ , o.time_ AS o_time_, o.delete_ AS o_delete_, u.user_name AS u_user_name, u.comment_ AS u_comment_ , u.time_ AS u_time_, u.delete_ AS u_delete_ FROM owners o INNER JOIN users u ON o.user_id = u.user_id WHERE o.user_id = ?',
+      // 'INSERT INTO owners (user_id) VALUES (?)',
+    ],
+  );
+  expect(
+    handlers.getFunGetTokens(
+      getFunGetResponseJSON,
+      DB9,
+      makeConnectionUpdateUsersReturnJSON,
+    )(app('test'))(req, res, next),
+  ).toEqual({
+    result: 'ERR',
+    description: 'SMS code is wrong -- код смс не соответсвует фейковой смс',
+    responseCode: '0041001',
+  });
+
+  /* 'SELECT o.owner_id AS o_owner_id , o.user_id AS o_user_id, o.comment_ AS o_comment_ , o.time_ AS o_time_, o.delete_ AS o_delete_, u.user_name AS u_user_name, u.comment_ AS u_comment_ , u.time_ AS u_time_, u.delete_ AS u_delete_ FROM owners o INNER JOIN users u ON o.user_id = u.user_id WHERE o.user_id = ?' до этого telephoneNumber == fakeTel smsCode == fakeSMS */
+  req = {
+    body: {
+      telephoneNumber: '79601302040', // фейковый телефон
+      smsCode: '12345', // фейковый смс
+    },
+  };
+  const DB10 = DB(
+    (query, paramArr, innerFun, otherThis, smsCodeNumberOfCharacters) => {
+      if (query === otherThis.queryList[0]) {
+        if (isNaN(Number(paramArr[0]))) return innerFun({ code: 'something1_DB10' });
+        return innerFun(false, [{ user_id: 1, telephone_id: 1 }]);
+      }
+      if (query === otherThis.queryList[1]) {
+        if (typeof paramArr[0] !== 'number') return innerFun({ code: 'something2_DB10' });
+        if (typeof paramArr[1] !== 'string') return innerFun({ code: 'something3_DB10' });
+        return innerFun(false, [{ smscode_value: 11112 }]);
+      }
+      if (query === otherThis.queryList[2]) {
+        if (typeof paramArr[0] !== 'number') return innerFun({ code: 'something4_DB5' });
+        return innerFun({ code: 'something5_DB5' });
+      }
+    },
+    [
+      'SELECT * FROM telephones WHERE telephone_number = ?',
+      'SELECT * FROM smscodes WHERE telephone_id = ? AND smscode_timeLastAttempt > ?',
+      'SELECT o.owner_id AS o_owner_id , o.user_id AS o_user_id, o.comment_ AS o_comment_ , o.time_ AS o_time_, o.delete_ AS o_delete_, u.user_name AS u_user_name, u.comment_ AS u_comment_ , u.time_ AS u_time_, u.delete_ AS u_delete_ FROM owners o INNER JOIN users u ON o.user_id = u.user_id WHERE o.user_id = ?',
+      // 'INSERT INTO owners (user_id) VALUES (?)',
+    ],
+  );
+  expect(
+    handlers.getFunGetTokens(
+      getFunGetResponseJSON,
+      DB10,
+      makeConnectionUpdateUsersReturnJSON,
+    )(app('test'))(req, res, next),
+  ).toEqual({
+    result: 'ERR',
+    description: 'Something went wrong -- ощибка БД SELECT * FROM owners WHERE user_id = ?',
+    responseCode: '0001003',
+  });
+
+  /* 'SELECT o.owner_id AS o_owner_id , o.user_id AS o_user_id, o.comment_ AS o_comment_ , o.time_ AS o_time_, o.delete_ AS o_delete_, u.user_name AS u_user_name, u.comment_ AS u_comment_ , u.time_ AS u_time_, u.delete_ AS u_delete_ FROM owners o INNER JOIN users u ON o.user_id = u.user_id WHERE o.user_id = ?' до этого telephoneNumber == fakeTel smsCode == fakeSMS */
+  req = {
+    body: {
+      telephoneNumber: '79601302040', // фейковый телефон
+      smsCode: '12345', // фейковый смс
+    },
+  };
+  const DB11 = DB(
+    (query, paramArr, innerFun, otherThis, smsCodeNumberOfCharacters) => {
+      if (query === otherThis.queryList[0]) {
+        if (isNaN(Number(paramArr[0]))) return innerFun({ code: 'something1_DB10' });
+        return innerFun(false, [{ user_id: 1, telephone_id: 1 }]);
+      }
+      if (query === otherThis.queryList[1]) {
+        if (typeof paramArr[0] !== 'number') return innerFun({ code: 'something2_DB10' });
+        if (typeof paramArr[1] !== 'string') return innerFun({ code: 'something3_DB10' });
+        return innerFun(false, [{ smscode_value: 11112 }]);
+      }
+      if (query === otherThis.queryList[2]) {
+        if (typeof paramArr[0] !== 'number') return innerFun({ code: 'something4_DB5' });
+        return innerFun(false, [{ u_user_name: 'vasa', o_owner_id: 1 }]);
+      }
+    },
+    [
+      'SELECT * FROM telephones WHERE telephone_number = ?',
+      'SELECT * FROM smscodes WHERE telephone_id = ? AND smscode_timeLastAttempt > ?',
+      'SELECT o.owner_id AS o_owner_id , o.user_id AS o_user_id, o.comment_ AS o_comment_ , o.time_ AS o_time_, o.delete_ AS o_delete_, u.user_name AS u_user_name, u.comment_ AS u_comment_ , u.time_ AS u_time_, u.delete_ AS u_delete_ FROM owners o INNER JOIN users u ON o.user_id = u.user_id WHERE o.user_id = ?',
+      // 'INSERT INTO owners (user_id) VALUES (?)',
+    ],
+  );
+  expect(
+    handlers.getFunGetTokens(
+      getFunGetResponseJSON,
+      DB11,
+      makeConnectionUpdateUsersReturnJSON,
+    )(app('test'))(req, res, next),
+  ).toEqual({
+    result: 'OK',
+    description: 'Tokens are get',
+    responseCode: '0040000',
+    accessToken: 'qwerty',
+    refreshToken: 'qwerty',
+    ownerId: 1,
+    userId: 1,
+    connectedUserAgent: [
+      {
+        connectedId: '1',
+        connectedUserAgentName: 'someAgent',
+      },
+    ],
+    status: 'auth',
+    userName: 'vasa',
+  });
+
+  /* 'INSERT INTO owners (user_id) VALUES (?)' err?.code === 'ER_DUP_ENTRY'*/
+  req = {
+    body: {
+      telephoneNumber: '79601302040', // фейковый телефон
+      smsCode: '12345', // фейковый смс
+    },
+  };
+  const DB12 = DB(
+    (query, paramArr, innerFun, otherThis, smsCodeNumberOfCharacters) => {
+      if (query === otherThis.queryList[0]) {
+        if (isNaN(Number(paramArr[0]))) return innerFun({ code: 'something1_DB12' });
+        return innerFun(false, [{ user_id: 1, telephone_id: 1 }]);
+      }
+      if (query === otherThis.queryList[1]) {
+        if (typeof paramArr[0] !== 'number') return innerFun({ code: 'something2_DB12' });
+        if (typeof paramArr[1] !== 'string') return innerFun({ code: 'something3_DB12' });
+        return innerFun(false, [{ smscode_value: 11112 }]);
+      }
+      if (query === otherThis.queryList[2]) {
+        if (typeof paramArr[0] !== 'number') return innerFun({ code: 'something4_DB12' });
+        return innerFun(false, []);
+      }
+      if (query === otherThis.queryList[3]) {
+        if (typeof paramArr[0] !== 'number') return innerFun({ code: 'something5_DB12' });
+        return innerFun({ code: 'ER_DUP_ENTRY' });
+      }
+    },
+    [
+      'SELECT * FROM telephones WHERE telephone_number = ?',
+      'SELECT * FROM smscodes WHERE telephone_id = ? AND smscode_timeLastAttempt > ?',
+      'SELECT o.owner_id AS o_owner_id , o.user_id AS o_user_id, o.comment_ AS o_comment_ , o.time_ AS o_time_, o.delete_ AS o_delete_, u.user_name AS u_user_name, u.comment_ AS u_comment_ , u.time_ AS u_time_, u.delete_ AS u_delete_ FROM owners o INNER JOIN users u ON o.user_id = u.user_id WHERE o.user_id = ?',
+      'INSERT INTO owners (user_id) VALUES (?)',
+    ],
+  );
+  expect(
+    handlers.getFunGetTokens(
+      getFunGetResponseJSON,
+      DB12,
+      makeConnectionUpdateUsersReturnJSON,
+    )(app('test'))(req, res, next),
+  ).toEqual({
+    result: 'ERR',
+    description: 'the owner was already registered',
+    responseCode: '0041003',
+  });
+
+  /* 'INSERT INTO owners (user_id) VALUES (?)' err */
+  req = {
+    body: {
+      telephoneNumber: '79601302040', // фейковый телефон
+      smsCode: '12345', // фейковый смс
+    },
+  };
+  const DB13 = DB(
+    (query, paramArr, innerFun, otherThis, smsCodeNumberOfCharacters) => {
+      if (query === otherThis.queryList[0]) {
+        if (isNaN(Number(paramArr[0]))) return innerFun({ code: 'something1_DB12' });
+        return innerFun(false, [{ user_id: 1, telephone_id: 1 }]);
+      }
+      if (query === otherThis.queryList[1]) {
+        if (typeof paramArr[0] !== 'number') return innerFun({ code: 'something2_DB12' });
+        if (typeof paramArr[1] !== 'string') return innerFun({ code: 'something3_DB12' });
+        return innerFun(false, [{ smscode_value: 11112 }]);
+      }
+      if (query === otherThis.queryList[2]) {
+        if (typeof paramArr[0] !== 'number') return innerFun({ code: 'something4_DB12' });
+        return innerFun(false, []);
+      }
+      if (query === otherThis.queryList[3]) {
+        if (typeof paramArr[0] !== 'number') return innerFun({ code: 'something5_DB12' });
+        return innerFun({ code: 'something6_DB13' });
+      }
+    },
+    [
+      'SELECT * FROM telephones WHERE telephone_number = ?',
+      'SELECT * FROM smscodes WHERE telephone_id = ? AND smscode_timeLastAttempt > ?',
+      'SELECT o.owner_id AS o_owner_id , o.user_id AS o_user_id, o.comment_ AS o_comment_ , o.time_ AS o_time_, o.delete_ AS o_delete_, u.user_name AS u_user_name, u.comment_ AS u_comment_ , u.time_ AS u_time_, u.delete_ AS u_delete_ FROM owners o INNER JOIN users u ON o.user_id = u.user_id WHERE o.user_id = ?',
+      'INSERT INTO owners (user_id) VALUES (?)',
+    ],
+  );
+  expect(
+    handlers.getFunGetTokens(
+      getFunGetResponseJSON,
+      DB13,
+      makeConnectionUpdateUsersReturnJSON,
+    )(app('test'))(req, res, next),
+  ).toEqual({
+    result: 'ERR',
+    description: 'Something went wrong -- ощибка БД INSERT INTO owners (user_id) VALUES (?)',
+    responseCode: '0001003',
+  });
+
+  /* 'INSERT INTO owners (user_id) VALUES (?)' err */
+  req = {
+    body: {
+      telephoneNumber: '79601302041',
+      smsCode: '11111',
+    },
+  };
+  const DB14 = DB(
+    (query, paramArr, innerFun, otherThis, smsCodeNumberOfCharacters) => {
+      if (query === otherThis.queryList[0]) {
+        if (isNaN(Number(paramArr[0]))) return innerFun({ code: 'something1_DB12' });
+        return innerFun(false, [{ user_id: 1, telephone_id: 1 }]);
+      }
+      if (query === otherThis.queryList[1]) {
+        if (typeof paramArr[0] !== 'number') return innerFun({ code: 'something2_DB12' });
+        if (typeof paramArr[1] !== 'string') return innerFun({ code: 'something3_DB12' });
+        return innerFun(false, [{ smscode_value: 11111 }]);
+      }
+      if (query === otherThis.queryList[2]) {
+        if (typeof paramArr[0] !== 'number') return innerFun({ code: 'something4_DB12' });
+        return innerFun(false, []);
+      }
+      if (query === otherThis.queryList[3]) {
+        if (typeof paramArr[0] !== 'number') return innerFun({ code: 'something5_DB12' });
+        return innerFun(false, { insertId: 1 });
+      }
+    },
+    [
+      'SELECT * FROM telephones WHERE telephone_number = ?',
+      'SELECT * FROM smscodes WHERE telephone_id = ? AND smscode_timeLastAttempt > ?',
+      'SELECT o.owner_id AS o_owner_id , o.user_id AS o_user_id, o.comment_ AS o_comment_ , o.time_ AS o_time_, o.delete_ AS o_delete_, u.user_name AS u_user_name, u.comment_ AS u_comment_ , u.time_ AS u_time_, u.delete_ AS u_delete_ FROM owners o INNER JOIN users u ON o.user_id = u.user_id WHERE o.user_id = ?',
+      'INSERT INTO owners (user_id) VALUES (?)',
+    ],
+  );
+  expect(
+    handlers.getFunGetTokens(
+      getFunGetResponseJSON,
+      DB14,
+      makeConnectionUpdateUsersReturnJSON,
+    )(app('test'))(req, res, next),
+  ).toEqual({
+    result: 'OK',
+    description: 'Tokens are get',
+    responseCode: '0040000',
+    accessToken: 'qwerty',
+    refreshToken: 'qwerty',
+    ownerId: 1,
+    userId: 1,
+    connectedUserAgent: [
+      {
+        connectedId: '1',
+        connectedUserAgentName: 'someAgent',
+      },
+    ],
+    status: 'reg',
+    userName: '',
+  });
+
+  /* 'INSERT INTO owners (user_id) VALUES (?)' err */
+  req = {
+    body: {
+      telephoneNumber: '79601302041',
+      smsCode: '11111',
+      userName: 'Roma',
+    },
+  };
+  const DB15 = DB(
+    (query, paramArr, innerFun, otherThis, smsCodeNumberOfCharacters) => {
+      if (query === otherThis.queryList[0]) {
+        if (isNaN(Number(paramArr[0]))) return innerFun({ code: 'something1_DB12' });
+        return innerFun(false, [{ user_id: 1, telephone_id: 1 }]);
+      }
+      if (query === otherThis.queryList[1]) {
+        if (typeof paramArr[0] !== 'number') return innerFun({ code: 'something2_DB12' });
+        if (typeof paramArr[1] !== 'string') return innerFun({ code: 'something3_DB12' });
+        return innerFun(false, [{ smscode_value: 11111 }]);
+      }
+      if (query === otherThis.queryList[2]) {
+        if (typeof paramArr[0] !== 'number') return innerFun({ code: 'something4_DB12' });
+        return innerFun(false, []);
+      }
+      if (query === otherThis.queryList[3]) {
+        if (typeof paramArr[0] !== 'number') return innerFun({ code: 'something5_DB12' });
+        return innerFun(false, { insertId: 1 });
+      }
+    },
+    [
+      'SELECT * FROM telephones WHERE telephone_number = ?',
+      'SELECT * FROM smscodes WHERE telephone_id = ? AND smscode_timeLastAttempt > ?',
+      'SELECT o.owner_id AS o_owner_id , o.user_id AS o_user_id, o.comment_ AS o_comment_ , o.time_ AS o_time_, o.delete_ AS o_delete_, u.user_name AS u_user_name, u.comment_ AS u_comment_ , u.time_ AS u_time_, u.delete_ AS u_delete_ FROM owners o INNER JOIN users u ON o.user_id = u.user_id WHERE o.user_id = ?',
+      'INSERT INTO owners (user_id) VALUES (?)',
+    ],
+  );
+  expect(
+    handlers.getFunGetTokens(
+      getFunGetResponseJSON,
+      DB15,
+      makeConnectionUpdateUsersReturnJSON,
+    )(app('test'))(req, res, next),
+  ).toEqual({
+    result: 'OK',
+    description: 'Tokens are get',
+    responseCode: '0040000',
+    accessToken: 'qwerty',
+    refreshToken: 'qwerty',
+    ownerId: 1,
+    userId: 1,
+    connectedUserAgent: [
+      {
+        connectedId: '1',
+        connectedUserAgentName: 'someAgent',
+      },
+    ],
+    status: 'reg',
+    userName: 'Roma',
+  });
   // const DB1 = DB(
   //   (query, paramArr, innerFun, otherThis, smsCodeNumberOfCharacters) => {
   //     if (query === otherThis.queryList[0]) {

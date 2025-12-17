@@ -148,7 +148,7 @@ const getFunGetTokens = (getFunGetResponseJSON, db, makeConnectionUpdateUsersRet
       const body = req?.body,
         telephoneNumber = body?.telephoneNumber,
         smsCode = body?.smsCode,
-        userName = body?.userName;
+        userName = body?.userName ?? '';
       if (!telephoneNumber || !smsCode) return res.status(200).json(getResponseJSON('0001000'));
       const telephoneNumberLength = telephoneNumber.length;
       if (
@@ -159,8 +159,10 @@ const getFunGetTokens = (getFunGetResponseJSON, db, makeConnectionUpdateUsersRet
         return res.status(200).json(getResponseJSON('0001002'));
       if (smsCode.length !== smsCodeNumberOfCharacters)
         return res.status(200).json(getResponseJSON('0041001'));
-      if (userName && userName.length > maxLenghtOfUserName)
+      if (userName && userName.length > maxLenghtOfUserName) {
         return res.status(200).json(getResponseJSON('0041002'));
+      }
+
       return db.run(
         'SELECT * FROM telephones WHERE telephone_number = ?',
         [telephoneNumber],
@@ -222,10 +224,11 @@ const getFunGetTokens = (getFunGetResponseJSON, db, makeConnectionUpdateUsersRet
                     .json(getResponseJSON('0041001', 'код смс не соответсвует реальной смс'));
               } else {
                 ifGetCheckGooglePlay();
-                if (smsCode !== fakeSMS)
+                if (smsCode !== fakeSMS) {
                   return res
                     .status(200)
                     .json(getResponseJSON('0041001', 'код смс не соответсвует фейковой смс'));
+                }
               }
               return db.run(
                 'SELECT o.owner_id AS o_owner_id , o.user_id AS o_user_id, o.comment_ AS o_comment_ , o.time_ AS o_time_, o.delete_ AS o_delete_, u.user_name AS u_user_name, u.comment_ AS u_comment_ , u.time_ AS u_time_, u.delete_ AS u_delete_ FROM owners o INNER JOIN users u ON o.user_id = u.user_id WHERE o.user_id = ?',
@@ -242,19 +245,13 @@ const getFunGetTokens = (getFunGetResponseJSON, db, makeConnectionUpdateUsersRet
                       );
                   if (!selectOwnersRows.length) {
                     // это потом протестируем
-                    db.run(
+                    return db.run(
                       'INSERT INTO owners (user_id) VALUES (?)',
                       [userId],
                       (err, insertOwnersRows) => {
-                        if (err?.code === 'ER_DUP_ENTRY')
-                          return res
-                            .status(200)
-                            .json(
-                              getResponseJSON(
-                                '0041002',
-                                'ощибка БД INSERT INTO owners (user_id) VALUES (?)',
-                              ),
-                            );
+                        if (err?.code === 'ER_DUP_ENTRY') {
+                          return res.status(200).json(getResponseJSON('0041003'));
+                        }
                         if (err)
                           return res
                             .status(200)
@@ -330,6 +327,7 @@ const getFunGetTokens = (getFunGetResponseJSON, db, makeConnectionUpdateUsersRet
   };
 };
 
+const getFunGetTokensV2 = (getFunGetResponseJSON, db, makeConnectionUpdateUsersReturnJSON) => {};
 exports.getSMSCodeFun = getFunGetSMSCodeForRegistrationByTelephone(
   smsGenerator,
   getFunGetResponseJSON,
